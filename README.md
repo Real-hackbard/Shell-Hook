@@ -324,8 +324,71 @@ module_init(my_init);
 module_exit(my_exit);
 ```
 
+</br>
 
+### Internal IAT hooking:
+The following code demonstrates how to hook functions that are imported from another module. This can be used to hook functions in a different process from the calling process. For this the code must be compiled into a DLL file then loaded into the target process using any method of DLL injection. The advantage of this method is that it is less detectable by antivirus software and/or [anti-cheat](https://en.wikipedia.org/wiki/Cheating_in_online_games#Anti-cheating_methods_and_limitations) software, one might make this into an external hook that doesn't make use of any malicious calls. The [Portable Executable](https://en.wikipedia.org/wiki/Portable_Executable) header contains the Import Address Table (IAT), which can be manipulated as shown in the source below. The source below runs under Microsoft Windows.
 
+```C++
+#include <windows.h>
+
+typedef int(__stdcall *pMessageBoxA) (HWND hWnd, LPCSTR lpText, LPCSTR lpCaption, UINT uType); //This is the 'type' of the MessageBoxA call.
+pMessageBoxA RealMessageBoxA; //This will store a pointer to the original function.
+
+void DetourIATptr(const char* function, void* newfunction, HMODULE module);
+
+int __stdcall NewMessageBoxA(HWND hWnd, LPCSTR lpText, LPCSTR lpCaption, UINT uType) { //Our fake function
+    printf("The String Sent to MessageBoxA Was : %s\n", lpText);
+    return RealMessageBoxA(hWnd, lpText, lpCaption, uType); //Call the real function
+}
+
+int main(int argc, CHAR *argv[]) {
+   DetourIATptr("MessageBoxA",(void*)NewMessageBoxA,0); //Hook the function
+   MessageBoxA(NULL, "Just A MessageBox", "Just A MessageBox", 0); //Call the function -- this will invoke our fake hook.
+   return 0;
+}
+
+void **IATfind(const char *function, HMODULE module) { //Find the IAT (Import Address Table) entry specific to the given function.
+	int ip = 0;
+	if (module == 0)
+		module = GetModuleHandle(0);
+	PIMAGE_DOS_HEADER pImgDosHeaders = (PIMAGE_DOS_HEADER)module;
+	PIMAGE_NT_HEADERS pImgNTHeaders = (PIMAGE_NT_HEADERS)((LPBYTE)pImgDosHeaders + pImgDosHeaders->e_lfanew);
+	PIMAGE_IMPORT_DESCRIPTOR pImgImportDesc = (PIMAGE_IMPORT_DESCRIPTOR)((LPBYTE)pImgDosHeaders + pImgNTHeaders->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_IMPORT].VirtualAddress);
+
+	if (pImgDosHeaders->e_magic != IMAGE_DOS_SIGNATURE)
+		printf("libPE Error : e_magic is no valid DOS signature\n");
+
+	for (IMAGE_IMPORT_DESCRIPTOR *iid = pImgImportDesc; iid->Name != NULL; iid++) {
+		for (int funcIdx = 0; *(funcIdx + (LPVOID*)(iid->FirstThunk + (SIZE_T)module)) != NULL; funcIdx++) {
+			char *modFuncName = (char*)(*(funcIdx + (SIZE_T*)(iid->OriginalFirstThunk + (SIZE_T)module)) + (SIZE_T)module + 2);
+			const uintptr_t nModFuncName = (uintptr_t)modFuncName;
+			bool isString = !(nModFuncName & (sizeof(nModFuncName) == 4 ? 0x80000000 : 0x8000000000000000));
+			if (isString) {
+				if (!_stricmp(function, modFuncName))
+					return funcIdx + (LPVOID*)(iid->FirstThunk + (SIZE_T)module);
+			}
+		}
+	}
+	return 0;
+}
+
+void DetourIATptr(const char *function, void *newfunction, HMODULE module) {
+	void **funcptr = IATfind(function, module);
+	if (*funcptr == newfunction)
+		 return;
+
+	DWORD oldrights, newrights = PAGE_READWRITE;
+	//Update the protection to READWRITE
+	VirtualProtect(funcptr, sizeof(LPVOID), newrights, &oldrights);
+
+	RealMessageBoxA = (pMessageBoxA)*funcptr; //Some compilers require the cast (like "MinGW"), not sure about MSVC though
+	*funcptr = newfunction;
+
+	//Restore the old memory protection flags.
+	VirtualProtect(funcptr, sizeof(LPVOID), oldrights, &newrights);
+}
+```
 
 
 
