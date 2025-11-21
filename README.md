@@ -17,7 +17,7 @@ Hook methods are of particular importance in the [template method pattern](https
 
 </br>
 
-### Run the ```SHELLHook.dproj``` file to build the ```ShellHook.dll```.
+### Run the ```SHELLHook.dproj``` file and build the ```ShellHook.dll```.
 
 </br>
 
