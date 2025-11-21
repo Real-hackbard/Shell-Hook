@@ -15,8 +15,15 @@ In computer programming, hooking is a range of techniques used to alter or augme
 
 Hook methods are of particular importance in the [template method pattern](https://en.wikipedia.org/wiki/Template_method_pattern) where common code in an abstract class can be augmented by custom code in a subclass. In this case each hook method is defined in the [abstract class](https://en.wikipedia.org/wiki/Abstract_type) with an empty implementation which then allows a different implementation to be supplied in each concrete subclass.
 
+</br>
 
+### Run the ```SHELLHook.dproj``` file to build the ```ShellHook.dll```.
 
+</br>
+
+![Shell Hook](https://github.com/user-attachments/assets/e85c4700-6d63-45b0-af71-e24b4bc01ed2)
+
+</br>
 
 
 
