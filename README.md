@@ -50,6 +50,285 @@ The following table describes the wParam and lParam parameter values ​​that 
 | HSHELL_APPCOMMAND |	The APPCOMMAND parameter that has not been handled by the application or other hooks. For more information, [see WM_APPCOMMAND](https://learn.microsoft.com/de-de/windows/win32/inputdev/wm-appcommand) and use the [GET_APPCOMMAND_LPARAM macro](https://learn.microsoft.com/de-de/windows/win32/api/winuser/nf-winuser-get_appcommand_lparam) to retrieve this parameter.. |
 | HSHELL_MONITORCHANGED |	A handle for the window that has been moved to another monitor.. |
 
+</br>
+
+### C++ Virtual method Sample Code:
+```c++
+#include <iostream>
+#include "windows.h"
+ 
+using namespace std;
+ 
+class VirtualClass
+{
+public:
+ 
+    int number;
+ 
+    virtual void VirtualFn1() //This is the virtual function that will be hooked.
+    {
+        cout << "VirtualFn1 called " << number++ << "\n\n";
+    }
+};
+ 
+using VirtualFn1_t = void(__thiscall*)(void* thisptr); 
+VirtualFn1_t orig_VirtualFn1;
+
+void __fastcall hkVirtualFn1(void* thisptr, int edx) //This is our hook function which we will cause the program to call instead of the original VirtualFn1 function after hooking is done.
+{
+    cout << "Hook function called" << "\n";
+ 
+    orig_VirtualFn1(thisptr); //Call the original function.
+}
+ 
+
+int main()
+{
+    VirtualClass* myClass = new VirtualClass(); //Create a pointer to a dynamically allocated instance of VirtualClass.
+ 
+    void** vTablePtr = *reinterpret_cast<void***>(myClass); //Find the address that points to the base of VirtualClass' VMT (which then points to VirtualFn1) and store it in vTablePtr.
+ 
+    DWORD oldProtection;
+    VirtualProtect(vTablePtr, 4, PAGE_EXECUTE_READWRITE, &oldProtection); //Removes page protection at the start of the VMT so we can overwrite its first pointer.
+ 
+    orig_VirtualFn1 = reinterpret_cast<VirtualFn1_t>(*vTablePtr); //Stores the pointer to VirtualFn1 from the VMT in a global variable so that it can be accessed again later after its entry in the VMT has been 
+                                                                  //overwritten with our hook function.
+ 
+    *vTablePtr = &hkVirtualFn1; //Overwrite the pointer to VirtualFn1 within the virtual table to a pointer to our hook function (hkVirtualFn1).
+ 
+    VirtualProtect(vTablePtr, 4, oldProtection, 0); //Restore old page protection.
+ 
+    myClass->VirtualFn1(); //Call the virtual function from our class instance. Because it is now hooked, this will actually call our hook function (hkVirtualFn1).
+    myClass->VirtualFn1();
+    myClass->VirtualFn1();
+ 
+    delete myClass;
+ 
+    return 0;
+}
+```
+</br>
+
+### C# keyboard event hook:
+The following example will hook into keyboard events in Microsoft Windows using the Microsoft .NET Framework.
+
+```c#
+using System.Runtime.InteropServices;
+
+namespace Hooks;
+
+public class KeyHook
+{
+    /* Member variables */
+    protected static int Hook;
+    protected static LowLevelKeyboardDelegate Delegate;
+    protected static readonly object Lock = new object();
+    protected static bool IsRegistered = false;
+
+    /* DLL imports */
+    [DllImport("user32")]
+    private static extern int SetWindowsHookEx(int idHook, LowLevelKeyboardDelegate lpfn,
+        int hmod, int dwThreadId);
+
+    [DllImport("user32")]
+    private static extern int CallNextHookEx(int hHook, int nCode, int wParam, KBDLLHOOKSTRUCT lParam);
+
+    [DllImport("user32")]
+    private static extern int UnhookWindowsHookEx(int hHook);
+
+    /* Types & constants */
+    protected delegate int LowLevelKeyboardDelegate(int nCode, int wParam, ref KBDLLHOOKSTRUCT lParam);
+    private const int HC_ACTION = 0;
+    private const int WM_KEYDOWN = 0x0100;
+    private const int WM_KEYUP = 0x0101;
+    private const int WH_KEYBOARD_LL = 13;
+
+    [StructLayout(LayoutKind.Sequential)]
+    public struct KBDLLHOOKSTRUCT
+    {
+        public int vkCode;
+        public int scanCode;
+        public int flags;
+        public int time;
+        public int dwExtraInfo;
+    }
+
+    /* Methods */
+    static private int LowLevelKeyboardHandler(int nCode, int wParam, ref KBDLLHOOKSTRUCT lParam)
+    {
+        if (nCode == HC_ACTION)
+        {
+            if (wParam == WM_KEYDOWN)
+                System.Console.Out.WriteLine("Key Down: " + lParam.vkCode);
+            else if (wParam == WM_KEYUP)
+                System.Console.Out.WriteLine("Key Up: " + lParam.vkCode);
+        }
+        return CallNextHookEx(Hook, nCode, wParam, lParam);
+    }
+
+    public static bool RegisterHook()
+    {
+        lock (Lock)
+        {
+            if (IsRegistered)
+                return true;
+            Delegate = LowLevelKeyboardHandler;
+            Hook = SetWindowsHookEx(
+                WH_KEYBOARD_LL, Delegate,
+                Marshal.GetHINSTANCE(
+                    System.Reflection.Assembly.GetExecutingAssembly().GetModules()[0]
+                ).ToInt32(), 0
+            );
+
+            if (Hook != 0)
+                return IsRegistered = true;
+            Delegate = null;
+            return false;
+        }
+    }
+
+    public static bool UnregisterHook()
+    {
+        lock (Lock)
+        {
+            return IsRegistered = (UnhookWindowsHookEx(Hook) != 0);
+        }
+    }
+}
+```
+
+</br>
+
+### API/function hooking method:
+The following source code is an example of an API/function hooking method which hooks by overwriting the first six bytes of a destination function with a [JMP](https://en.wikipedia.org/wiki/JMP_(x86_instruction)) instruction to a new function. The code is compiled into a DLL file then loaded into the target process using any method of [DLL injection](https://en.wikipedia.org/wiki/DLL_injection). Using a backup of the original function one might then restore the first six bytes again so the call will not be interrupted. In this example the [win32 API](https://en.wikipedia.org/wiki/Win32_API) function MessageBoxW is hooked.
+
+```c++
+#include <windows.h>  
+#define SIZE 6
+
+ typedef int (WINAPI *pMessageBoxW)(HWND, LPCWSTR, LPCWSTR, UINT);  // Messagebox prototype
+ int WINAPI MyMessageBoxW(HWND, LPCWSTR, LPCWSTR, UINT);            // Our detour
+
+ void BeginRedirect(LPVOID);                                        
+ pMessageBoxW pOrigMBAddress = NULL;                                // address of original
+ BYTE oldBytes[SIZE] = {0};                                         // backup
+ BYTE JMP[SIZE] = {0};                                              // 6 byte JMP instruction
+ DWORD oldProtect, myProtect = PAGE_EXECUTE_READWRITE;
+
+ INT APIENTRY DllMain(HMODULE hDLL, DWORD Reason, LPVOID Reserved)  
+ {  
+   switch (Reason)  
+   {  
+   case DLL_PROCESS_ATTACH:                                        // if attached
+     pOrigMBAddress = (pMessageBoxW)                      
+       GetProcAddress(GetModuleHandleA("user32.dll"),              // get address of original 
+               "MessageBoxW");  
+     if (pOrigMBAddress != NULL)  
+       BeginRedirect(MyMessageBoxW);                               // start detouring
+     break;
+
+   case DLL_PROCESS_DETACH:  
+     VirtualProtect((LPVOID)pOrigMBAddress, SIZE, myProtect, &oldProtect);   // assign read write protection
+     memcpy(pOrigMBAddress, oldBytes, SIZE);                                 // restore backup
+     VirtualProtect((LPVOID)pOrigMBAddress, SIZE, oldProtect, &myProtect);   // reset protection
+
+   case DLL_THREAD_ATTACH:  
+   case DLL_THREAD_DETACH:  
+     break;  
+   }  
+   return TRUE;  
+ }
+
+ void BeginRedirect(LPVOID newFunction)  
+ {  
+   BYTE tempJMP[SIZE] = {0xE9, 0x90, 0x90, 0x90, 0x90, 0xC3};              // 0xE9 = JMP 0x90 = NOP 0xC3 = RET
+   memcpy(JMP, tempJMP, SIZE);                                             // store jmp instruction to JMP
+   DWORD JMPSize = ((DWORD)newFunction - (DWORD)pOrigMBAddress - 5);       // calculate jump distance
+   VirtualProtect((LPVOID)pOrigMBAddress, SIZE,                            // assign read write protection
+           PAGE_EXECUTE_READWRITE, &oldProtect);  
+   memcpy(oldBytes, pOrigMBAddress, SIZE);                                 // make backup
+   memcpy(&JMP[1], &JMPSize, 4);                                           // fill the nop's with the jump distance (JMP,distance(4bytes),RET)
+   memcpy(pOrigMBAddress, JMP, SIZE);                                      // set jump instruction at the beginning of the original function
+   VirtualProtect((LPVOID)pOrigMBAddress, SIZE, oldProtect, &myProtect);   // reset protection
+ }
+
+ int WINAPI MyMessageBoxW(HWND hWnd, LPCWSTR lpText, LPCWSTR lpCaption, UINT uiType)  
+ {  
+   VirtualProtect((LPVOID)pOrigMBAddress, SIZE, myProtect, &oldProtect);   // assign read write protection
+   memcpy(pOrigMBAddress, oldBytes, SIZE);                                 // restore backup
+   int retValue = MessageBoxW(hWnd, lpText, lpCaption, uiType);            // get return value of original function
+   memcpy(pOrigMBAddress, JMP, SIZE);                                      // set the jump instruction again
+   VirtualProtect((LPVOID)pOrigMBAddress, SIZE, oldProtect, &myProtect);   // reset protection
+   return retValue;                                                        // return original return value
+ }
+```
+
+</br>
+
+### Netfilter hook:
+This example shows how to use hooking to alter network traffic in the Linux kernel using [Netfilter](https://en.wikipedia.org/wiki/Netfilter).
+
+```C++
+#include <linux/module.h>
+#include <linux/kernel.h>
+#include <linux/skbuff.h>
+
+#include <linux/ip.h>
+#include <linux/tcp.h>
+#include <linux/in.h>
+#include <linux/netfilter.h>
+#include <linux/netfilter_ipv4.h>
+
+/* Port we want to drop packets on */
+static const uint16_t port = 25;
+
+/* This is the hook function itself */
+static unsigned int hook_func(unsigned int hooknum,
+                       struct sk_buff **pskb,
+                       const struct net_device *in,
+                       const struct net_device *out,
+                       int (*okfn)(struct sk_buff *))
+{
+        struct iphdr *iph = ip_hdr(*pskb);
+        struct tcphdr *tcph, tcpbuf;
+
+        if (iph->protocol != IPPROTO_TCP)
+                return NF_ACCEPT;
+
+        tcph = skb_header_pointer(*pskb, ip_hdrlen(*pskb), sizeof(*tcph), &tcpbuf);
+        if (tcph == NULL)
+                return NF_ACCEPT;
+
+        return (tcph->dest == port) ? NF_DROP : NF_ACCEPT;
+}
+
+/* Used to register our hook function */
+static struct nf_hook_ops nfho = {
+        .hook     = hook_func,
+        .hooknum  = NF_IP_PRE_ROUTING,
+        .pf       = NFPROTO_IPV4,
+        .priority = NF_IP_PRI_FIRST,
+};
+
+static __init int my_init(void)
+{
+        return nf_register_hook(&nfho);
+}
+
+static __exit void my_exit(void)
+{
+    nf_unregister_hook(&nfho);
+}
+
+module_init(my_init);
+module_exit(my_exit);
+```
+
+
+
+
+
+
 
 
 
