@@ -33,7 +33,22 @@ RegisterWindowMessage(TEXT("SHELLHOOK"));
 
 The following table describes the wParam and lParam parameter values ​​that can be passed to the window procedure for the shell hook messages.
 
-
+| wParam | lParam |
+| :-----------  | :-----------  |
+| HSHELL_GETMINRECT	| A pointer to a SHELLHOOKINFO structure. |
+| HSHELL_WINDOWACTIVATED |	A handle for the activated window. |
+| HSHELL_RUDEAPPACTIVATED |	A handle for the activated window. |
+| HSHELL_WINDOWREPLACING |	A handle for the window that replaces the top-level window.. |
+| HSHELL_WINDOWREPLACED |	A handle for the window to be replaced. |
+| HSHELL_WINDOWCREATED |	A handle for the window to be created. |
+| HSHELL_WINDOWDESTROYED |	A handle for the top-level window that will be destroyed. |
+| HSHELL_ACTIVATESHELLWINDOW |	Not used. |
+| HSHELL_TASKMAN |	Can be ignored. |
+| HSHELL_REDRAW |	A handle for the window that needs to be redrawn.. |
+| HSHELL_FLASH |	A handle for the window that needs to be flashed.. |
+| HSHELL_ENDTASK |	A handle for the window that is to be forced to close.. |
+| HSHELL_APPCOMMAND |	The APPCOMMAND parameter that has not been handled by the application or other hooks. For more information, [see WM_APPCOMMAND](https://learn.microsoft.com/de-de/windows/win32/inputdev/wm-appcommand) and use the [GET_APPCOMMAND_LPARAM macro](https://learn.microsoft.com/de-de/windows/win32/api/winuser/nf-winuser-get_appcommand_lparam) to retrieve this parameter.. |
+| HSHELL_MONITORCHANGED |	A handle for the window that has been moved to another monitor.. |
 
 
 
