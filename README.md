@@ -11,6 +11,15 @@
 
 </br>
 
+In computer programming, hooking is a range of techniques used to alter or augment the behaviour of an operating system, of [applications](https://en.wikipedia.org/wiki/Application_software), or of other software components by intercepting [function calls](https://en.wikipedia.org/wiki/Function_(computer_programming)) or [messages](https://en.wikipedia.org/wiki/Message_passing) or 8events](https://en.wikipedia.org/wiki/Event_(computing)) passed between [software components](https://en.wikipedia.org/wiki/Modular_programming). Code that handles such intercepted function calls, events or messages is called a hook.
+
+Hook methods are of particular importance in the [template method pattern](https://en.wikipedia.org/wiki/Template_method_pattern) where common code in an abstract class can be augmented by custom code in a subclass. In this case each hook method is defined in the [abstract class](https://en.wikipedia.org/wiki/Abstract_type) with an empty implementation which then allows a different implementation to be supplied in each concrete subclass.
+
+
+
+
+
+
 
 
 
