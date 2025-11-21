@@ -25,7 +25,13 @@ Hook methods are of particular importance in the [template method pattern](https
 
 </br>
 
+As with normal window messages, the second parameter of the window procedure identifies the message as WM_SHELLHOOKMESSAGE. However, for these shell hook messages, the message value is not a predefined constant like other message IDs such as [WM_COMMAND](https://learn.microsoft.com/de-de/windows/win32/menurc/wm-command). The value must be retrieved dynamically using a call to [RegisterWindowMessage](https://learn.microsoft.com/de-de/windows/win32/api/winuser/nf-winuser-registerwindowmessagea), as shown here:
 
+```pascal
+RegisterWindowMessage(TEXT("SHELLHOOK"));
+```
+
+The following table describes the wParam and lParam parameter values ​​that can be passed to the window procedure for the shell hook messages.
 
 
 
