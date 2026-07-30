@@ -36,7 +36,7 @@ RegisterWindowMessage(TEXT("SHELLHOOK"));
 </br>
 
 # initialization driver
-* First, open the ```SHELLHook.dpr``` project and build a new driver, which you then copy into the main project.
+* First, open the ```SHELLHook.dproj``` project and build a new driver, which you then copy into the main project.
   * Ignore the error message after compiling.  
     </br>
 	<img src="https://github.com/user-attachments/assets/0d239836-0311-470f-8b4e-cff83337d8b2" />
