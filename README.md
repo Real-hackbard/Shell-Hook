@@ -51,6 +51,40 @@ RegisterWindowMessage(TEXT("SHELLHOOK"));
   * ```Pointer size:``` Use NativeInt or NativeUInt instead of Integer or LongInt when storing pointers or handle values ​​in messages (TMessage).
   * ```API declarations:``` Windows API functions such as RegisterShellHookWindow and RegisterWindowMessage('SHELLHOOK') must be correctly imported for Win64 using the standard types from the Windows unit.
   * ```DLL injection``` (if used): If your shell hook is intended to operate globally within a DLL, that DLL must also be a 64-bit DLL, because 64-bit processes cannot load 32-bit DLLs (and vice versa).
+  * ###
+  ```pascal
+  procedure InjectDLL64(ProcessID: DWORD; const DLLPath: string);
+	var
+	  hProcess, hThread: THandle;
+	  pLibPath: Pointer;
+	  BytesWritten: NativeUInt;
+	begin
+	  hProcess := OpenProcess(PROCESS_ALL_ACCESS, False, ProcessID);
+	  if hProcess <> 0 then
+	  begin
+	    // Speicher im 64-Bit-Zielprozess reservieren
+	    pLibPath := VirtualAllocEx(hProcess, nil,
+	                               Length(DLLPath) * SizeOf(Char),
+	                               MEM_COMMIT, PAGE_READWRITE);
+	
+	    // DLL-Pfad in den Speicher schreiben
+	    WriteProcessMemory(hProcess, pLibPath, PChar(DLLPath),
+	                       Length(DLLPath) * SizeOf(Char), BytesWritten);
+	
+	    // LoadLibrary im Zielprozess aufrufen, um die Hook-DLL auszuführen
+	    hThread := CreateRemoteThread(hProcess, nil, 0,
+	               GetProcAddress(GetModuleHandle('kernel32.dll'),
+	               'LoadLibraryW'),
+	               pLibPath,
+	               0,
+	               BytesWritten);
+	
+	    WaitForSingleObject(hThread, INFINITE);
+	    CloseHandle(hThread);
+	    CloseHandle(hProcess);
+	  end;
+	end;
+````
 
 </br>
 
