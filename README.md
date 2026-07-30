@@ -115,6 +115,8 @@ Initialization errors may occur with the 64-bit driver, and the solutions for th
 
 The following table describes the wParam and lParam parameter values ​​that can be passed to the window procedure for the shell hook messages.
 
+:link: More Information : https://learn.microsoft.com/en-us/previous-versions/windows/desktop/legacy/ms644991(v=vs.85)
+
 | wParam | lParam |
 | :-----------  | :-----------  |
 | ```HSHELL_GETMINRECT```	| A pointer to a SHELLHOOKINFO structure. |
