@@ -37,7 +37,17 @@ RegisterWindowMessage(TEXT("SHELLHOOK"));
 
 # initialization driver
 * First, open the ```SHELLHook.dpr``` project and build a new driver, which you then copy into the main project.
-
+* StartMouseHook function is typically a user-defined custom wrapper used to initialize a Windows mouse hook via SetWindowsHookEx, utilizing parameters like WH_MOUSE or WH_MOUSE_LL (low-level) to monitor mouse activity globally or locally.
+  * ### 32 bit
+    ```pascal
+    function StartMouseHook(State: Boolean; Wnd: HWND): Boolean; stdcall; external 'SHELLHook.dll';
+	function StopMouseHook(): Boolean; stdcall; external 'SHELLHook.dll';
+	```
+  * ### 64 bit
+    ```pascal
+    function StartMouseHook64(State: Boolean; Wnd: HWND): Boolean; stdcall; external 'SHELLHook64.dll';
+	function StopMouseHook64(): Boolean; stdcall; external 'SHELLHook64.dll';
+	```
 
 </br>
 
