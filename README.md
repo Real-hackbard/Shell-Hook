@@ -66,16 +66,16 @@ RegisterWindowMessage(TEXT("SHELLHOOK"));
 	  hProcess := OpenProcess(PROCESS_ALL_ACCESS, False, ProcessID);
 	  if hProcess <> 0 then
 	  begin
-	    // Speicher im 64-Bit-Zielprozess reservieren
+	    // Allocate memory in the 64-bit target process
 	    pLibPath := VirtualAllocEx(hProcess, nil,
 	                               Length(DLLPath) * SizeOf(Char),
 	                               MEM_COMMIT, PAGE_READWRITE);
 	
-	    // DLL-Pfad in den Speicher schreiben
+	    // Write DLL path to memory
 	    WriteProcessMemory(hProcess, pLibPath, PChar(DLLPath),
 	                       Length(DLLPath) * SizeOf(Char), BytesWritten);
 	
-	    // LoadLibrary im Zielprozess aufrufen, um die Hook-DLL auszuführen
+	    // Call LoadLibrary in the target process to execute the hook DLL.
 	    hThread := CreateRemoteThread(hProcess, nil, 0,
 	               GetProcAddress(GetModuleHandle('kernel32.dll'),
 	               'LoadLibraryW'),
