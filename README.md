@@ -20,7 +20,7 @@ Hook methods are of particular importance in the [template method pattern](https
 
 </br>
 
-![Shell Hook](https://github.com/user-attachments/assets/e85c4700-6d63-45b0-af71-e24b4bc01ed2)
+<img src="https://github.com/user-attachments/assets/8ba005f1-dda6-459b-b0d7-0cf3f7a6de92" />
 
 </br>
 
