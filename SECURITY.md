@@ -8,6 +8,7 @@ currently being supported with security updates.
 | Version | Supported          |
 | ------- | ------------------ |
 | 1.0.x   | :white_check_mark: |
+| 1.1.x   | :white_check_mark: Add: determination PID, Process Memory Usage, Process Type, Tasklist; Add initial 64 bit driver |
 
 ## Reporting a Vulnerability
 
