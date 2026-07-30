@@ -51,7 +51,7 @@ RegisterWindowMessage(TEXT("SHELLHOOK"));
   * ```Pointer size:``` Use NativeInt or NativeUInt instead of Integer or LongInt when storing pointers or handle values ​​in messages (TMessage).
   * ```API declarations:``` Windows API functions such as RegisterShellHookWindow and RegisterWindowMessage('SHELLHOOK') must be correctly imported for Win64 using the standard types from the Windows unit.
   * ```DLL injection``` (if used): If your shell hook is intended to operate globally within a DLL, that DLL must also be a 64-bit DLL, because 64-bit processes cannot load 32-bit DLLs (and vice versa).
-  * ###
+  * ### Inject 64 bit dll
   ```pascal
   procedure InjectDLL64(ProcessID: DWORD; const DLLPath: string);
 	var
