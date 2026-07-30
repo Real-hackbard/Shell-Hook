@@ -48,7 +48,7 @@ RegisterWindowMessage(TEXT("SHELLHOOK"));
     function StartMouseHook64(State: Boolean; Wnd: HWND): Boolean; stdcall; external 'SHELLHook64.dll';
 	function StopMouseHook64(): Boolean; stdcall; external 'SHELLHook64.dll';
 	```
-  * Zeigergröße: Verwenden Sie NativeInt oder NativeUInt anstelle von Integer oder LongInt, wenn Sie Zeiger oder Handle-Werte in Nachrichten (TMessage) speichern.
+  * Pointer size: Use NativeInt or NativeUInt instead of Integer or LongInt when storing pointers or handle values ​​in messages (TMessage).
 
 </br>
 
