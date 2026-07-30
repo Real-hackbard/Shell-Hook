@@ -37,6 +37,13 @@ RegisterWindowMessage(TEXT("SHELLHOOK"));
 
 # initialization driver
 * First, open the ```SHELLHook.dpr``` project and build a new driver, which you then copy into the main project.
+  * Ignore the error message after compiling.  
+    </br>
+	<img src="https://github.com/user-attachments/assets/0d239836-0311-470f-8b4e-cff83337d8b2" />
+
+
+
+
 * StartMouseHook function is typically a user-defined custom wrapper used to initialize a Windows mouse hook via SetWindowsHookEx, utilizing parameters like WH_MOUSE or WH_MOUSE_LL (low-level) to monitor mouse activity globally or locally.
   * ### 32 bit
     ```pascal
