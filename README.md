@@ -34,7 +34,7 @@ RegisterWindowMessage(TEXT("SHELLHOOK"));
 </br>
 
 # initialization driver
-* First, open the SHELLHook.dpr project and build a new driver, which you then copy into the main project.
+* First, open the ```SHELLHook.dpr``` project and build a new driver, which you then copy into the main project.
 
 
 </br>
