@@ -48,7 +48,8 @@ RegisterWindowMessage(TEXT("SHELLHOOK"));
     function StartMouseHook64(State: Boolean; Wnd: HWND): Boolean; stdcall; external 'SHELLHook64.dll';
 	function StopMouseHook64(): Boolean; stdcall; external 'SHELLHook64.dll';
 	```
-  * Pointer size: Use NativeInt or NativeUInt instead of Integer or LongInt when storing pointers or handle values ​​in messages (TMessage).
+  * ```Pointer size:``` Use NativeInt or NativeUInt instead of Integer or LongInt when storing pointers or handle values ​​in messages (TMessage).
+  * ```API declarations:``` Windows API functions such as RegisterShellHookWindow and RegisterWindowMessage('SHELLHOOK') must be correctly imported for Win64 using the standard types from the Windows unit.
 
 </br>
 
