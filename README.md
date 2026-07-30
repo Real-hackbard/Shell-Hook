@@ -109,7 +109,7 @@ int main()
 ```
 </br>
 
-### C# keyboard event hook:
+### :speech_balloon: C# keyboard event hook:
 The following example will hook into keyboard events in Microsoft Windows using the Microsoft .NET Framework.
 
 ```c#
@@ -199,7 +199,7 @@ public class KeyHook
 
 </br>
 
-### API/function hooking method:
+### :speech_balloon: API/function hooking method:
 The following source code is an example of an API/function hooking method which hooks by overwriting the first six bytes of a destination function with a [JMP](https://en.wikipedia.org/wiki/JMP_(x86_instruction)) instruction to a new function. The code is compiled into a DLL file then loaded into the target process using any method of [DLL injection](https://en.wikipedia.org/wiki/DLL_injection). Using a backup of the original function one might then restore the first six bytes again so the call will not be interrupted. In this example the [win32 API](https://en.wikipedia.org/wiki/Win32_API) function MessageBoxW is hooked.
 
 ```c++
@@ -326,7 +326,7 @@ module_exit(my_exit);
 
 </br>
 
-### Internal IAT hooking:
+### :speech_balloon: Internal IAT hooking:
 The following code demonstrates how to hook functions that are imported from another module. This can be used to hook functions in a different process from the calling process. For this the code must be compiled into a DLL file then loaded into the target process using any method of DLL injection. The advantage of this method is that it is less detectable by antivirus software and/or [anti-cheat](https://en.wikipedia.org/wiki/Cheating_in_online_games#Anti-cheating_methods_and_limitations) software, one might make this into an external hook that doesn't make use of any malicious calls. The [Portable Executable](https://en.wikipedia.org/wiki/Portable_Executable) header contains the Import Address Table (IAT), which can be manipulated as shown in the source below. The source below runs under Microsoft Windows.
 
 ```C++
