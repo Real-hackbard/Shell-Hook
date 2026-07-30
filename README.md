@@ -93,7 +93,14 @@ RegisterWindowMessage(TEXT("SHELLHOOK"));
 </br>
 
 ### Possible errors
-Initialization errors may occur with the 64-bit driver, and the solutions for these can vary. It can be helpful if the project includes both 32-bit and 64-bit configurations. To achieve this, the 64-bit platform configuration must be manually added in the compiler. Right-click on the target platform in the project browser on the right and select "64-bit platform."
+Initialization errors may occur with the 64-bit driver, and the solutions for these can vary. It can be helpful if the project includes both 32-bit and 64-bit configurations. To achieve this, the 64-bit platform configuration must be manually added in the compiler. Right-click on the target platform in the project browser on the right and select "```64-bit platform````".
+
+</br>
+
+<img src="https://github.com/user-attachments/assets/5fa3987f-37fd-4ce9-8598-4c093f325cfe" />
+
+</br>
+
 
 # Parameters
 
